@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "https://screenguard-api.onrender.com/api/auth";
 
 // ─── AUTH LOGIC ───────────────────────────────────────────
 let isLogin = true;
