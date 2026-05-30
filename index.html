@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScreenGuard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- AUTH SCREEN -->
+  <div class="container" id="authScreen">
+    <h1>ScreenGuard</h1>
+
+    <div class="card">
+      <h2 id="authTitle">Login</h2>
+
+      <input type="text" id="nameInput" placeholder="Name" style="display:none"><br>
+      <input type="email" id="emailInput" placeholder="Email"><br>
+      <input type="password" id="passwordInput" placeholder="Password"><br>
+
+      <button id="authBtn">Login</button>
+      <p id="toggleAuth">Don't have an account? <a href="#" id="toggleLink">Register</a></p>
+      <p id="authMessage"></p>
+    </div>
+  </div>
+
+  <!-- MAIN APP SCREEN -->
+  <div class="container" id="appScreen" style="display:none">
+    <h1>ScreenGuard</h1>
+    <p id="welcomeMsg"></p>
+
+    <div class="card">
+      <h2>Today's Screen Time</h2>
+      <p id="timer">00:00:00</p>
+    </div>
+
+    <div class="card">
+      <h2>Break Reminder</h2>
+      <p>You'll receive a reminder every hour.</p>
+    </div>
+
+    <button id="resetBtn">Reset Timer</button>
+    <button id="logoutBtn" style="background:#dc3545; margin-left:10px;">Logout</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
