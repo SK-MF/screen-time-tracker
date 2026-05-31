@@ -15,7 +15,7 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: process.env.AUTH0_SECRET || process.env.JWT_SECRET,
-  baseURL: process.env.APP_BASE_URL || "https://screentime-trackers.netlify.app",
+  baseURL: "https://screenguard-api.onrender.com",
   clientID: process.env.AUTH0_CLIENT_ID,
   issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
 };
