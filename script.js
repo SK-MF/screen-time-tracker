@@ -105,6 +105,31 @@ function showApp(name) {
 
 // ── AUTO LOGIN IF TOKEN EXISTS ──
 window.addEventListener('load', () => {
+  // Check for Google OAuth callback
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  const name = urlParams.get('name');
+  const error = urlParams.get('error');
+
+  if (token && name) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('name', decodeURIComponent(name));
+    window.history.replaceState({}, document.title, '/');
+    showApp(decodeURIComponent(name));
+    return;
+  }
+
+  if (error) {
+    console.log('Google login error:', error);
+    return;
+  }
+
+  // Existing auto login check
+  const savedToken = localStorage.getItem('token');
+  const savedName = localStorage.getItem('name');
+  if (savedToken) showApp(savedName);
+});
+window.addEventListener('load', () => {
   const token = localStorage.getItem('token');
   const name = localStorage.getItem('name');
   if (token) showApp(name);
