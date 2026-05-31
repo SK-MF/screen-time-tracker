@@ -9,13 +9,20 @@ require("dotenv").config();
 const authRoutes = require("./routes/auth");
 
 const app = express();
+
 app.use(cors({
   origin: [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
-    "https://screentime-trackers.netlify.app"  
+    "https://screentime-trackers.netlify.app"
   ]
 }));
+
+app.use(express.json());
+
+mongoose.connect(process.env.MONGO_URI, {
+  family: 4,
+  serverSelectionTimeoutMS: 5000,
 })
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
