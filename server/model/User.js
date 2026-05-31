@@ -7,6 +7,8 @@ const UserSchema = new mongoose.Schema({
     unique: true
   },
   password: String,
+  resetCode: String,
+  resetCodeExpiry: Number,
   createdAt: {
     type: Date,
     default: Date.now

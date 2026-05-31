@@ -1,8 +1,4 @@
-const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first");
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
-
-const API_URL = "https://your-render-url.onrender.com/api/auth";
+const API_URL = "https://screenguard-api.onrender.com/api/auth";
 
 // ── TAB SWITCHER ──
 function switchTab(tab) {
@@ -15,6 +11,15 @@ function switchTab(tab) {
   document.getElementById('formSub').textContent = tab === 'login'
     ? 'Track your screen time, protect your focus.'
     : 'Join thousands building better screen habits.';
+}
+
+// ── PAGE NAVIGATION ──
+function showPage(pageId) {
+  ['loginPage', 'forgotPage', 'verifyPage', 'resetPage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById(pageId).style.display = 'flex';
 }
 
 // ── REGISTER ──
@@ -90,7 +95,10 @@ async function handleLogin() {
 
 // ── SHOW APP ──
 function showApp(name) {
-  document.getElementById('loginPage').style.display = 'none';
+  ['loginPage', 'forgotPage', 'verifyPage', 'resetPage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   document.getElementById('appPage').style.display = 'block';
   document.getElementById('welcomeMsg').textContent = `Welcome back, ${name}! 👋`;
 }
@@ -107,7 +115,7 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('token');
   localStorage.removeItem('name');
   document.getElementById('appPage').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
+  showPage('loginPage');
 });
 
 // ── TIMER ──
@@ -136,3 +144,108 @@ function updateTimer() {
 
 setInterval(updateTimer, 1000);
 document.getElementById('resetBtn').addEventListener('click', () => { seconds = 0; });
+
+// ── FORGOT PASSWORD ──
+let resetEmail = '';
+
+async function handleForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const msg = document.getElementById('forgotMessage');
+
+  if (!email) { msg.textContent = 'Please enter your email.'; return; }
+
+  try {
+    const res = await fetch(API_URL + '/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error;
+      msg.classList.remove('success');
+      return;
+    }
+
+    resetEmail = email;
+    document.getElementById('verifySub').textContent = `We sent a 6-digit code to ${email}`;
+    msg.classList.add('success');
+    msg.textContent = 'Code sent! Redirecting...';
+    setTimeout(() => showPage('verifyPage'), 1500);
+
+  } catch (err) {
+    msg.textContent = 'Server error.';
+  }
+}
+
+// ── VERIFY CODE ──
+async function handleVerifyCode() {
+  const code = document.getElementById('verifyCode').value.trim();
+  const msg = document.getElementById('verifyMessage');
+
+  if (!code) { msg.textContent = 'Please enter the code.'; return; }
+
+  try {
+    const res = await fetch(API_URL + '/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetEmail, code })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error;
+      msg.classList.remove('success');
+      return;
+    }
+
+    msg.classList.add('success');
+    msg.textContent = 'Code verified! Redirecting...';
+    setTimeout(() => showPage('resetPage'), 1500);
+
+  } catch (err) {
+    msg.textContent = 'Server error.';
+  }
+}
+
+// ── RESET PASSWORD ──
+async function handleResetPassword() {
+  const newPassword = document.getElementById('newPassword').value.trim();
+  const confirmPassword = document.getElementById('confirmPassword').value.trim();
+  const msg = document.getElementById('resetMessage');
+  const code = document.getElementById('verifyCode').value.trim();
+
+  if (!newPassword || !confirmPassword) {
+    msg.textContent = 'Please fill in all fields.'; return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    msg.textContent = 'Passwords do not match.'; return;
+  }
+
+  try {
+    const res = await fetch(API_URL + '/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resetEmail, code, newPassword })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error;
+      msg.classList.remove('success');
+      return;
+    }
+
+    msg.classList.add('success');
+    msg.textContent = 'Password reset! Redirecting to login...';
+    setTimeout(() => showPage('loginPage'), 1500);
+
+  } catch (err) {
+    msg.textContent = 'Server error.';
+  }
+}

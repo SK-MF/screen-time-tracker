@@ -28,7 +28,7 @@
         <div id="login-panel" class="panel active">
           <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@gmail.com"></div>
           <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-          <div class="forgot"><a href="#">Forgot password?</a></div>
+          <div class="forgot"><a href="#" onclick="showPage('forgotPage')">Forgot password?</a></div>
           <button class="btn-main" onclick="handleLogin()">Login</button>
           <div class="divider"><span>or</span></div>
           <button class="btn-google">
@@ -81,6 +81,85 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD: Enter Email -->
+  <div id="forgotPage" class="page-wrapper" style="display:none">
+    <div class="split-container">
+      <div class="left-panel">
+        <div class="logo"><div class="logo-dot"></div>ScreenGuard</div>
+        <div class="form-title">Forgot password</div>
+        <div class="form-sub">Enter your email and we'll send a reset code.</div>
+        <div class="panel active">
+          <div class="field"><label>Email</label><input type="email" id="forgotEmail" placeholder="you@gmail.com"></div>
+          <button class="btn-main" onclick="handleForgotPassword()">Send reset code</button>
+          <p class="auth-message" id="forgotMessage"></p>
+          <div class="contact-link" style="margin-top:20px">
+            <a href="#" onclick="showPage('loginPage')">← Back to login</a>
+          </div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="right-bg"></div>
+        <div class="grid-overlay"></div>
+        <div class="right-tagline">
+          <h2>Don't worry,<br>we got you.</h2>
+          <p>A reset code will be sent to your Gmail within seconds.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD: Enter Code -->
+  <div id="verifyPage" class="page-wrapper" style="display:none">
+    <div class="split-container">
+      <div class="left-panel">
+        <div class="logo"><div class="logo-dot"></div>ScreenGuard</div>
+        <div class="form-title">Enter your code</div>
+        <div class="form-sub" id="verifySub">We sent a 6-digit code to your email.</div>
+        <div class="panel active">
+          <div class="field"><label>6-digit code</label><input type="text" id="verifyCode" placeholder="123456" maxlength="6"></div>
+          <button class="btn-main" onclick="handleVerifyCode()">Verify code</button>
+          <p class="auth-message" id="verifyMessage"></p>
+          <div class="contact-link" style="margin-top:20px">
+            <a href="#" onclick="showPage('forgotPage')">← Back</a>
+          </div>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="right-bg"></div>
+        <div class="grid-overlay"></div>
+        <div class="right-tagline">
+          <h2>Check your<br>inbox.</h2>
+          <p>The code expires in 15 minutes. Check spam if you don't see it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD: New Password -->
+  <div id="resetPage" class="page-wrapper" style="display:none">
+    <div class="split-container">
+      <div class="left-panel">
+        <div class="logo"><div class="logo-dot"></div>ScreenGuard</div>
+        <div class="form-title">New password</div>
+        <div class="form-sub">Choose a strong new password.</div>
+        <div class="panel active">
+          <div class="field"><label>New password</label><input type="password" id="newPassword" placeholder="New password"></div>
+          <div class="field"><label>Confirm password</label><input type="password" id="confirmPassword" placeholder="Repeat password"></div>
+          <button class="btn-main" onclick="handleResetPassword()">Reset password</button>
+          <p class="auth-message" id="resetMessage"></p>
+        </div>
+      </div>
+      <div class="right-panel">
+        <div class="right-bg"></div>
+        <div class="grid-overlay"></div>
+        <div class="right-tagline">
+          <h2>Almost there.</h2>
+          <p>Create a strong password you'll remember.</p>
+        </div>
+      </div>
     </div>
   </div>
 
