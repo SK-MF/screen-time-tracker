@@ -1,130 +1,138 @@
-const API_URL = "https://screenguard-api.onrender.com/api/auth";
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-// ─── AUTH LOGIC ───────────────────────────────────────────
-let isLogin = true;
+const API_URL = "https://your-render-url.onrender.com/api/auth";
 
-const authScreen = document.getElementById("authScreen");
-const appScreen = document.getElementById("appScreen");
-const authTitle = document.getElementById("authTitle");
-const nameInput = document.getElementById("nameInput");
-const emailInput = document.getElementById("emailInput");
-const passwordInput = document.getElementById("passwordInput");
-const authBtn = document.getElementById("authBtn");
-const authMessage = document.getElementById("authMessage");
-const toggleLink = document.getElementById("toggleLink");
-const welcomeMsg = document.getElementById("welcomeMsg");
+// ── TAB SWITCHER ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) =>
+    t.classList.toggle('active', i === (tab === 'login' ? 0 : 1))
+  );
+  document.getElementById('login-panel').classList.toggle('active', tab === 'login');
+  document.getElementById('register-panel').classList.toggle('active', tab === 'register');
+  document.getElementById('formTitle').textContent = tab === 'login' ? 'Welcome back' : 'Create account';
+  document.getElementById('formSub').textContent = tab === 'login'
+    ? 'Track your screen time, protect your focus.'
+    : 'Join thousands building better screen habits.';
+}
 
-// Toggle between Login and Register
-toggleLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  isLogin = !isLogin;
-  authTitle.textContent = isLogin ? "Login" : "Register";
-  authBtn.textContent = isLogin ? "Login" : "Register";
-  nameInput.style.display = isLogin ? "none" : "block";
-  toggleLink.textContent = isLogin ? "Register" : "Login";
-  document.querySelector("#toggleAuth").firstChild.textContent = isLogin
-    ? "Don't have an account? "
-    : "Already have an account? ";
-});
+// ── REGISTER ──
+async function handleRegister() {
+  const name = document.getElementById('registerName').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value.trim();
+  const msg = document.getElementById('registerMessage');
 
-// Login or Register
-authBtn.addEventListener("click", async () => {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-  const name = nameInput.value.trim();
-
-  if (!email || !password || (!isLogin && !name)) {
-    authMessage.textContent = "Please fill in all fields.";
+  if (!name || !email || !password) {
+    msg.textContent = 'Please fill in all fields.';
     return;
   }
 
-  const endpoint = isLogin ? "/login" : "/register";
-  const body = isLogin ? { email, password } : { name, email, password };
-
   try {
-    const res = await fetch(API_URL + endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+    const res = await fetch(API_URL + '/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      authMessage.textContent = data.error || "Something went wrong.";
+      msg.textContent = data.error || 'Something went wrong.';
+      msg.classList.remove('success');
       return;
     }
 
-    if (isLogin) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("name", data.name);
-      showApp(data.name);
-    } else {
-      authMessage.style.color = "green";
-      authMessage.textContent = "Registered! Please login.";
-      toggleLink.click(); // switch to login
-    }
+    msg.textContent = 'Account created! Please login.';
+    msg.classList.add('success');
+    setTimeout(() => switchTab('login'), 1500);
 
   } catch (err) {
-    authMessage.textContent = "Server error. Is your server running?";
+    msg.textContent = 'Server error. Is your server running?';
   }
-});
+}
 
-// Show app if already logged in
-window.addEventListener("load", () => {
-  const token = localStorage.getItem("token");
-  const name = localStorage.getItem("name");
-  if (token) {
-    showApp(name);
+// ── LOGIN ──
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const msg = document.getElementById('loginMessage');
+
+  if (!email || !password) {
+    msg.textContent = 'Please fill in all fields.';
+    return;
   }
-});
 
+  try {
+    const res = await fetch(API_URL + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error || 'Invalid email or password.';
+      msg.classList.remove('success');
+      return;
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('name', data.name);
+    showApp(data.name);
+
+  } catch (err) {
+    msg.textContent = 'Server error. Is your server running?';
+  }
+}
+
+// ── SHOW APP ──
 function showApp(name) {
-  authScreen.style.display = "none";
-  appScreen.style.display = "block";
-  welcomeMsg.textContent = `Welcome back, ${name}! 👋`;
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').style.display = 'block';
+  document.getElementById('welcomeMsg').textContent = `Welcome back, ${name}! 👋`;
 }
 
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("name");
-  appScreen.style.display = "none";
-  authScreen.style.display = "block";
-  emailInput.value = "";
-  passwordInput.value = "";
+// ── AUTO LOGIN IF TOKEN EXISTS ──
+window.addEventListener('load', () => {
+  const token = localStorage.getItem('token');
+  const name = localStorage.getItem('name');
+  if (token) showApp(name);
 });
 
-// ─── TIMER LOGIC ───────────────────────────────────────────
-let seconds = 0;
-const timerElement = document.getElementById("timer");
-const resetBtn = document.getElementById("resetBtn");
+// ── LOGOUT ──
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('name');
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+});
 
-if (Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
+// ── TIMER ──
+let seconds = 0;
+const timerElement = document.getElementById('timer');
+
+if (Notification.permission !== 'granted') Notification.requestPermission();
 
 function updateTimer() {
   seconds++;
   let hrs = Math.floor(seconds / 3600);
   let mins = Math.floor((seconds % 3600) / 60);
   let secs = seconds % 60;
-
   timerElement.textContent =
-    String(hrs).padStart(2, "0") + ":" +
-    String(mins).padStart(2, "0") + ":" +
-    String(secs).padStart(2, "0");
-
-  if (seconds % 3600 === 0) sendBreakNotification();
-}
-
-function sendBreakNotification() {
-  if (Notification.permission === "granted") {
-    new Notification("Time for a Break!", {
-      body: "You've been using your device for 1 hour. Take a 5-minute break."
-    });
+    String(hrs).padStart(2, '0') + ':' +
+    String(mins).padStart(2, '0') + ':' +
+    String(secs).padStart(2, '0');
+  if (seconds % 3600 === 0) {
+    if (Notification.permission === 'granted') {
+      new Notification('Time for a Break!', {
+        body: "You've been using your device for 1 hour. Take a 5-minute break."
+      });
+    }
   }
 }
 
 setInterval(updateTimer, 1000);
-resetBtn.addEventListener("click", () => { seconds = 0; });
+document.getElementById('resetBtn').addEventListener('click', () => { seconds = 0; });
